@@ -15,8 +15,8 @@ import java.util.regex.Pattern;
 
 public class KafkaStreamsApplication {
 
-    private static final String INPUT_TOPIC = "streams-input";
-    private static final String OUTPUT_TOPIC = "streams-output";
+    private static final String INPUT_TOPIC = "streams-plaintext-input";
+    private static final String OUTPUT_TOPIC = "streams-wordcount-output";
 
     public static void main(String[] args) {
         final Properties streamsConfiguration = getStreamsConfiguration();

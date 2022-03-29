@@ -1,11 +1,11 @@
 package szoeke.bence.kafkastreams;
 
-import szoeke.bence.kafkastreams.processor.Consumer;
+import szoeke.bence.kafkastreams.processor.MyConsumer;
 
 public class KafkaStreamsApplication {
 
     public static void main(String[] args) {
-        Consumer consumer = new Consumer();
+        MyConsumer consumer = new MyConsumer();
         consumer.consumeRecords();
     }
 }

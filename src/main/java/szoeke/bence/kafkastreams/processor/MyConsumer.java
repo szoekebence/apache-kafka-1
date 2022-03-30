@@ -5,6 +5,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.VoidDeserializer;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -14,33 +15,30 @@ public class MyConsumer {
 
     private static final String INPUT_TOPIC = "streams-input";
     private static final String OUTPUT_TOPIC = "streams-output";
+    private final Properties properties;
 
-    public void consumeRecords() {
-        final Properties properties = generateConsumerProperties();
-        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
-        consumer.subscribe(Collections.singleton(INPUT_TOPIC));
-        doConsuming(consumer);
+    public MyConsumer() {
+        properties = new Properties();
+        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "MyConsumerGroup");
+        properties.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
+        properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, VoidDeserializer.class.getName());
+        properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
     }
 
-    private void doConsuming(KafkaConsumer<String, String> consumer) {
-        while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
-            for (ConsumerRecord<String, String> record : records) {
-                System.out.println(record.key());
-                System.out.println(record.value());
-            }
+    public void consumeRecords() {
+        try (KafkaConsumer<Void, String> consumer = new KafkaConsumer<>(properties)) {
+            consumer.subscribe(Collections.singleton(INPUT_TOPIC));
+            doConsuming(consumer);
         }
     }
 
-    private Properties generateConsumerProperties() {
-        final Properties properties = new Properties();
-        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "MyConsumer");
-        properties.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
-        properties.setProperty(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
-        properties.setProperty(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "30000");
-        properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        return properties;
+    private void doConsuming(KafkaConsumer<Void, String> consumer) {
+        while (true) {
+            ConsumerRecords<Void, String> records = consumer.poll(Duration.ofMillis(1000));
+            for (ConsumerRecord<Void, String> record : records) {
+                System.out.println(record.timestamp());
+            }
+        }
     }
 }

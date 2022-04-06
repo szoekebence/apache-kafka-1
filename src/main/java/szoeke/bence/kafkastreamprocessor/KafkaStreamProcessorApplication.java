@@ -1,14 +1,12 @@
 package szoeke.bence.kafkastreamprocessor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import szoeke.bence.kafkastreamprocessor.processor.MyKafkaStreamProcessor;
+import szoeke.bence.kafkastreamprocessor.processor.StreamProcessor;
 
 public class KafkaStreamProcessorApplication {
 
     public static void main(String[] args) {
-        MyKafkaStreamProcessor processor = new MyKafkaStreamProcessor(new ObjectMapper());
-        while (true) {
-            processor.processRecords();
-        }
+        StreamProcessor processor = new StreamProcessor(new ObjectMapper());
+        processor.processEvents();
     }
 }

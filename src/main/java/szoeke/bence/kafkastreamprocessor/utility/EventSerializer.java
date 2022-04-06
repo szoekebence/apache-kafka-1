@@ -6,6 +6,8 @@ import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Serializer;
 import szoeke.bence.kafkastreamprocessor.entity.Event;
 
+import java.nio.charset.StandardCharsets;
+
 public class EventSerializer implements Serializer<Event> {
 
     private final ObjectMapper objectMapper;
@@ -17,7 +19,7 @@ public class EventSerializer implements Serializer<Event> {
     @Override
     public byte[] serialize(String str, Event data) {
         try {
-            return objectMapper.writeValueAsString(data).getBytes();
+            return objectMapper.writeValueAsString(data).getBytes(StandardCharsets.UTF_8);
         } catch (JsonProcessingException e) {
             throw new SerializationException();
         }

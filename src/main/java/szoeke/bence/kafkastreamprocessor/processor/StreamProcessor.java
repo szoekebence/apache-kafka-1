@@ -6,7 +6,9 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.Produced;
 import szoeke.bence.kafkastreamprocessor.entity.Event;
 import szoeke.bence.kafkastreamprocessor.utility.EventDeserializer;
 import szoeke.bence.kafkastreamprocessor.utility.EventSerializer;
@@ -60,13 +62,6 @@ public class StreamProcessor {
         KStream<Long, Event> views = builder.stream(
                 INPUT_TOPIC,
                 Consumed.with(longSerde, eventSerde));
-//        KTable<Long, Long> totalViews = views
-//                .groupByKey(Grouped.with(longSerde, eventSerde))
-//                .count();
         views.to(OUTPUT_TOPIC, Produced.with(longSerde, eventSerde));
     }
-
-
-//
-//        totalViews.toStream().to("streams-output", Produced.with(stringSerde, longSerde));
 }

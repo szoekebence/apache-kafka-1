@@ -3,6 +3,7 @@ package szoeke.bence.kafkastreamprocessor.utility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.errors.SerializationException;
+import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.Serializer;
 import szoeke.bence.kafkastreamprocessor.entity.Event;
 
@@ -18,6 +19,15 @@ public class EventSerializer implements Serializer<Event> {
 
     @Override
     public byte[] serialize(String str, Event data) {
+        try {
+            return objectMapper.writeValueAsString(data).getBytes(StandardCharsets.UTF_8);
+        } catch (JsonProcessingException e) {
+            throw new SerializationException();
+        }
+    }
+
+    @Override
+    public byte[] serialize(String topic, Headers headers, Event data) {
         try {
             return objectMapper.writeValueAsString(data).getBytes(StandardCharsets.UTF_8);
         } catch (JsonProcessingException e) {

@@ -1,12 +1,18 @@
 package szoeke.bence.kafkastreamprocessor.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import szoeke.bence.kafkastreamprocessor.entity.innerentity.EventInfo;
 import szoeke.bence.kafkastreamprocessor.entity.innerentity.EventRecordHeader;
 
 import java.io.Serializable;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Event implements Serializable {
 
     public EventRecordHeader eventRecordHeader;

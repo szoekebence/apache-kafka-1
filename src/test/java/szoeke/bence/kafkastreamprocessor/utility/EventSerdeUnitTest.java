@@ -87,7 +87,7 @@ public class EventSerdeUnitTest {
         result.Direction = "N";
         result.SessionId = "O";
         result.Time = 7L;
-        result.message = getMessage();
+        result.Message = getMessage();
         return result;
     }
 

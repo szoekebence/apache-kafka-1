@@ -21,9 +21,9 @@ public class StreamProcessor {
     private static final String INPUT_TOPIC = "streams-input";
     private static final String OUTPUT_TOPIC = "streams-output";
     private final Properties properties;
-    private Serde<Event> eventSerde;
-    private Serde<Long> longSerde;
-    private StreamsBuilder builder;
+    private final Serde<Event> eventSerde;
+    private final Serde<Long> longSerde;
+    private final StreamsBuilder builder;
 
     public StreamProcessor(ObjectMapper objectMapper) {
         eventSerde = Serdes.serdeFrom(new EventSerializer(objectMapper), new EventDeserializer(objectMapper));

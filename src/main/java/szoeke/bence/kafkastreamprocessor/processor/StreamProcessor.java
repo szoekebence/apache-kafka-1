@@ -7,12 +7,13 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
 import szoeke.bence.kafkastreamprocessor.entity.Event;
+import szoeke.bence.kafkastreamprocessor.entity.innerentity.SipMessage;
 import szoeke.bence.kafkastreamprocessor.utility.EventDeserializer;
 import szoeke.bence.kafkastreamprocessor.utility.EventSerializer;
 
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
@@ -59,9 +60,38 @@ public class StreamProcessor {
     }
 
     private void defineOperations() {
-        KStream<Long, Event> views = builder.stream(
-                INPUT_TOPIC,
-                Consumed.with(longSerde, eventSerde));
-        views.to(OUTPUT_TOPIC, Produced.with(longSerde, eventSerde));
+        builder
+                .stream(INPUT_TOPIC, Consumed.with(longSerde, eventSerde))
+                .mapValues(this::mapValues)
+                .to(OUTPUT_TOPIC, Produced.with(longSerde, eventSerde));
     }
+
+    //remove headerfield list items where headerfield name equals to "From", "To" or "Via"
+    private Event mapValues(Long key, Event event) {
+        List<String> ignorableFieldNames = List.of("From", "To", "Via");
+        for (SipMessage message : event.eventInfo.SipMessages) {
+            message.HeaderFields
+                    .removeIf(headerField -> ignorableFieldNames.contains(headerField.Name));
+        }
+        return event;
+    }
+
+//remove KeyIds
+//    private Event mapValues(Long object, Event event) {
+//        event.eventRecordHeader.KeyIds = null;
+//        return event;
+//    }
+
+
+//filter by result:
+//    private void defineOperations() {
+//        builder
+//                .stream(INPUT_TOPIC, Consumed.with(longSerde, eventSerde))
+//                .filter(this::filterResult)
+//                .to(OUTPUT_TOPIC, Produced.with(longSerde, eventSerde));
+//    }
+//
+//    private boolean filterResult(Long key, Event event) {
+//        return event.eventRecordHeader.Result == 1;
+//    }
 }

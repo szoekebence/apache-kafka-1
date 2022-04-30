@@ -9,8 +9,6 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Produced;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import szoeke.bence.kafkastreamprocessor.entity.Event;
 import szoeke.bence.kafkastreamprocessor.entity.innerentity.SipMessage;
 import szoeke.bence.kafkastreamprocessor.utility.EventDeserializer;
@@ -18,11 +16,11 @@ import szoeke.bence.kafkastreamprocessor.utility.EventSerializer;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 public class StreamProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StreamProcessor.class);
     private static final List<String> IGNORABLE_FIELD_NAMES = List.of("From", "To", "Via");
     private static final String INPUT_TOPIC = "streams-input";
     private static final String OUTPUT_TOPIC = "streams-output";
@@ -43,6 +41,7 @@ public class StreamProcessor {
     public void processEvents() {
         defineMapOperations();
 //        defineWindowedByOperations();
+//        startOperations();
         startOperations();
     }
 
@@ -96,30 +95,23 @@ public class StreamProcessor {
         return sipMessage;
     }
 
+//    private void startOperations() {
+//        try (KafkaStreams streams = new KafkaStreams(builder.build(), properties)) {
+//            streams.start();
+//        } catch (Exception e) {
+//        }
+//    }
+
     private void startOperations() {
         try (KafkaStreams streams = new KafkaStreams(builder.build(), properties)) {
-            streams.start();
-        } catch (Exception e) {
-            LOGGER.error(String.format("Stream processing failed with exception: %s.", e.getMessage()));
+            final CountDownLatch latch = new CountDownLatch(1);
+            try {
+                streams.start();
+                latch.await();
+            } catch (final Throwable e) {
+                System.exit(1);
+            }
         }
+        System.exit(0);
     }
-
-//    private void startOperationsWithShutdownHook() {
-//        try (KafkaStreams streams = new KafkaStreams(builder.build(), properties)) {
-//            final CountDownLatch latch = new CountDownLatch(1);
-//            try {
-//                streams.start();
-//                latch.await();
-//            } catch (final Throwable e) {
-//                System.exit(1);
-//            }
-//            Runtime.getRuntime().addShutdownHook(new Thread("stream-processor") {
-//                @Override
-//                public void run() {
-//                    latch.countDown();
-//                }
-//            });
-//        }
-//        System.exit(0);
-//    }
 }

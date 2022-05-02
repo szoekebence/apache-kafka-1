@@ -11,7 +11,7 @@
 
     <properties>
         <java.version>11</java.version>
-        <start-class>szoeke.bence.kafkaprocessor.KafkaStreamProcessorApplication</start-class>
+        <start-class>szoeke.bence.kafkaprocessor.KafkaProcessorApplication</start-class>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
     </properties>

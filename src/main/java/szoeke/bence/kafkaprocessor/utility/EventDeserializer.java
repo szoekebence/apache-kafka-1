@@ -1,10 +1,10 @@
-package szoeke.bence.kafkastreamprocessor.utility;
+package szoeke.bence.kafkaprocessor.utility;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.Deserializer;
-import szoeke.bence.kafkastreamprocessor.entity.Event;
+import szoeke.bence.kafkaprocessor.entity.Event;
 
 import java.io.IOException;
 

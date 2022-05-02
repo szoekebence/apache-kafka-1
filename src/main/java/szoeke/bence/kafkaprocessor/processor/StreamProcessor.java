@@ -1,4 +1,4 @@
-package szoeke.bence.kafkastreamprocessor.processor;
+package szoeke.bence.kafkaprocessor.processor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.serialization.Serde;
@@ -8,10 +8,10 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.*;
-import szoeke.bence.kafkastreamprocessor.entity.Event;
-import szoeke.bence.kafkastreamprocessor.entity.innerentity.SipMessage;
-import szoeke.bence.kafkastreamprocessor.utility.EventDeserializer;
-import szoeke.bence.kafkastreamprocessor.utility.EventSerializer;
+import szoeke.bence.kafkaprocessor.entity.Event;
+import szoeke.bence.kafkaprocessor.entity.innerentity.SipMessage;
+import szoeke.bence.kafkaprocessor.utility.EventDeserializer;
+import szoeke.bence.kafkaprocessor.utility.EventSerializer;
 
 import java.time.Duration;
 import java.util.List;
@@ -31,11 +31,13 @@ public class StreamProcessor {
     private static final String OUTPUT_TOPIC = "streams-output";
     private static final String OPERATION_TYPE_ENV_VAR = "OPERATION_TYPE";
     private static final String BOOTSTRAP_SERVER_ENV_VAR = "BOOTSTRAP_SERVER";
+    private static final String TIME_WINDOW_SIZE_ENV_VAR = "TIME_WINDOW_SIZE";
     private final Properties properties;
     private final Serde<Event> eventSerde;
     private final Serde<String> stringSerde;
     private final StreamsBuilder builder;
     private final OPERATION_TYPE operationType;
+    private final long timeWindowSize;
 
     public StreamProcessor(ObjectMapper objectMapper) {
         this.eventSerde = Serdes.serdeFrom(new EventSerializer(objectMapper), new EventDeserializer(objectMapper));
@@ -45,6 +47,7 @@ public class StreamProcessor {
         this.properties.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "stream-processor");
         this.properties.putIfAbsent(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, System.getenv(BOOTSTRAP_SERVER_ENV_VAR));
         this.operationType = OPERATION_TYPE.valueOf(System.getenv(OPERATION_TYPE_ENV_VAR));
+        this.timeWindowSize = Long.parseLong(System.getenv(TIME_WINDOW_SIZE_ENV_VAR));
     }
 
     public void processEvents() {
@@ -79,7 +82,7 @@ public class StreamProcessor {
                     .stream(INPUT_TOPIC, Consumed.with(stringSerde, eventSerde))
                     .filter(this::filterEventRecordHeaderResult)
                     .groupBy((key, event) -> event.eventRecordHeader.Cause.ErrorCode.toString(), Grouped.with(stringSerde, eventSerde))
-                    .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofMillis(2500)))
+                    .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofMillis(timeWindowSize)))
                     .count()
                     .mapValues(Object::toString)
                     .toStream()

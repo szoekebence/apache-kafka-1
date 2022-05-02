@@ -1,4 +1,4 @@
-package szoeke.bence.kafkastreamprocessor.entity.innerentity;
+package szoeke.bence.kafkaprocessor.entity.innerentity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -13,12 +13,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SipMessage {
+public class Cause {
 
-    public Long Time;
-    public String Direction;
-    public StartLine StartLine;
-    public String Interface;
-    public List<NameValuePair<String>> HeaderFields;
+    public Long ErrorCode;
+    public List<AdditionalInfo> AdditionalInfos;
 
 }

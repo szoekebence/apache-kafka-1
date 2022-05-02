@@ -1,4 +1,4 @@
-package szoeke.bence.kafkastreamprocessor.entity.innerentity;
+package szoeke.bence.kafkaprocessor.entity.innerentity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -6,17 +6,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AppId {
+public class EventInfo {
 
-    public String Type;
-    public String Role;
-    public String PayLoad;
-    public String NodeId;
-    public String SwVersion;
+    public List<SipMessage> SipMessages;
+    public List<DiameterMessage> DiameterMessages;
+    public List<Object> DnsEnumMessages;
 
 }

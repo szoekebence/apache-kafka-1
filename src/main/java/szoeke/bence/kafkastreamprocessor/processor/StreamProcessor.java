@@ -33,13 +33,13 @@ public class StreamProcessor {
     private static final String BOOTSTRAP_SERVER_ENV_VAR = "BOOTSTRAP_SERVER";
     private final Properties properties;
     private final Serde<Event> eventSerde;
-    private final Serde<Long> longSerde;
+    private final Serde<String> stringSerde;
     private final StreamsBuilder builder;
     private final OPERATION_TYPE operationType;
 
     public StreamProcessor(ObjectMapper objectMapper) {
         this.eventSerde = Serdes.serdeFrom(new EventSerializer(objectMapper), new EventDeserializer(objectMapper));
-        this.longSerde = Serdes.Long();
+        this.stringSerde = Serdes.String();
         this.builder = new StreamsBuilder();
         this.properties = new Properties();
         this.properties.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "stream-processor");
@@ -65,40 +65,41 @@ public class StreamProcessor {
 
     private void defineFilterAndMapOperations() {
         builder
-                .stream(INPUT_TOPIC, Consumed.with(longSerde, eventSerde))
+                .stream(INPUT_TOPIC, Consumed.with(stringSerde, eventSerde))
                 .filter(this::filterEventRecordHeaderResult)
                 .map(this::mapEventRecordHeaderKeyIds)
                 .map(this::mapHeaderFieldName)
-                .to(OUTPUT_TOPIC, Produced.with(longSerde, eventSerde));
+                .to(OUTPUT_TOPIC, Produced.with(stringSerde, eventSerde));
     }
 
     private void defineFilterAndWindowedByAndCountOperations() {
-        try (TimeWindowedSerializer<Long> serializer = new TimeWindowedSerializer<>(Serdes.Long().serializer());
-             TimeWindowedDeserializer<Long> deserializer = new TimeWindowedDeserializer<>(Serdes.Long().deserializer())) {
+        try (TimeWindowedSerializer<String> serializer = new TimeWindowedSerializer<>(stringSerde.serializer());
+             TimeWindowedDeserializer<String> deserializer = new TimeWindowedDeserializer<>(stringSerde.deserializer())) {
             builder
-                    .stream(INPUT_TOPIC, Consumed.with(longSerde, eventSerde))
+                    .stream(INPUT_TOPIC, Consumed.with(stringSerde, eventSerde))
                     .filter(this::filterEventRecordHeaderResult)
-                    .groupBy((key, event) -> event.eventRecordHeader.Cause.ErrorCode)
+                    .groupBy((key, event) -> event.eventRecordHeader.Cause.ErrorCode.toString(), Grouped.with(stringSerde, eventSerde))
                     .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofMillis(2500)))
                     .count()
+                    .mapValues(Object::toString)
                     .toStream()
-                    .to(OUTPUT_TOPIC, Produced.with(Serdes.serdeFrom(serializer, deserializer), Serdes.Long()));
+                    .to(OUTPUT_TOPIC, Produced.with(Serdes.serdeFrom(serializer, deserializer), stringSerde));
         }
     }
 
     //filter by result
-    private boolean filterEventRecordHeaderResult(Long key, Event event) {
+    private boolean filterEventRecordHeaderResult(String key, Event event) {
         return event.eventRecordHeader.Result == 1;
     }
 
     //remove KeyIds
-    private KeyValue<Long, Event> mapEventRecordHeaderKeyIds(Long key, Event event) {
+    private KeyValue<String, Event> mapEventRecordHeaderKeyIds(String key, Event event) {
         event.eventRecordHeader.KeyIds = null;
         return KeyValue.pair(key, event);
     }
 
     //remove headerfield list items where headerfield name equals to "From", "To" or "Via"
-    private KeyValue<Long, Event> mapHeaderFieldName(Long key, Event event) {
+    private KeyValue<String, Event> mapHeaderFieldName(String key, Event event) {
         event.eventInfo.SipMessages = event.eventInfo.SipMessages
                 .parallelStream()
                 .map(this::mapSipMessage)

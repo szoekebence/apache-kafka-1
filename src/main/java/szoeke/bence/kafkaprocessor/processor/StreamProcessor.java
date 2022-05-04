@@ -23,7 +23,7 @@ public class StreamProcessor {
 
     private enum OPERATION_TYPE {
         FILTER_AND_MAP,
-        FILTER_AND_WINDOWED_BY_AND_COUNT
+        WINDOWED_BY_AND_COUNT
     }
 
     private static final List<String> IGNORABLE_FIELD_NAMES = List.of("From", "To", "Via");
@@ -60,8 +60,8 @@ public class StreamProcessor {
             case FILTER_AND_MAP:
                 defineFilterAndMapOperations();
                 break;
-            case FILTER_AND_WINDOWED_BY_AND_COUNT:
-                defineFilterAndWindowedByAndCountOperations();
+            case WINDOWED_BY_AND_COUNT:
+                defineWindowedByAndCountOperations();
                 break;
         }
     }
@@ -75,13 +75,12 @@ public class StreamProcessor {
                 .to(OUTPUT_TOPIC, Produced.with(stringSerde, eventSerde));
     }
 
-    private void defineFilterAndWindowedByAndCountOperations() {
+    private void defineWindowedByAndCountOperations() {
         try (TimeWindowedSerializer<String> serializer = new TimeWindowedSerializer<>(stringSerde.serializer());
              TimeWindowedDeserializer<String> deserializer = new TimeWindowedDeserializer<>(stringSerde.deserializer())) {
             builder
                     .stream(INPUT_TOPIC, Consumed.with(stringSerde, eventSerde))
-                    .filter(this::filterEventRecordHeaderResult)
-                    .groupBy((key, event) -> event.eventRecordHeader.Cause.ErrorCode.toString(), Grouped.with(stringSerde, eventSerde))
+                    .groupBy((key, event) -> event.eventRecordHeader.Result.toString(), Grouped.with(stringSerde, eventSerde))
                     .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofMillis(timeWindowSize)))
                     .count()
                     .mapValues(Object::toString)

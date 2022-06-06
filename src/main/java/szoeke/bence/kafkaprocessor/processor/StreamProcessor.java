@@ -63,6 +63,8 @@ public class StreamProcessor {
             case STATEFUL:
                 defineWindowedByAndCountOperations();
                 break;
+            default:
+                throw new RuntimeException("Unexpected operation type.");
         }
     }
 

@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 public class StreamProcessor {
 
     private enum OPERATION_TYPE {
-        FILTER_AND_MAP,
-        WINDOWED_BY_AND_COUNT
+        STATELESS,
+        STATEFUL
     }
 
     private static final List<String> IGNORABLE_FIELD_NAMES = List.of("From", "To", "Via");
@@ -57,10 +57,10 @@ public class StreamProcessor {
 
     private void chooseOperation() {
         switch (operationType) {
-            case FILTER_AND_MAP:
+            case STATELESS:
                 defineFilterAndMapOperations();
                 break;
-            case WINDOWED_BY_AND_COUNT:
+            case STATEFUL:
                 defineWindowedByAndCountOperations();
                 break;
         }

@@ -31,7 +31,7 @@ public class StreamProcessor {
     private static final String OUTPUT_TOPIC = "streams-output";
     private static final String OPERATION_TYPE_ENV_VAR = "OPERATION_TYPE";
     private static final String BOOTSTRAP_SERVER_ENV_VAR = "BOOTSTRAP_SERVER";
-    private static final String TIME_WINDOW_SIZE_ENV_VAR = "TIME_WINDOW_SIZE";
+    private static final String TIME_WINDOW_SIZE_MS_ENV_VAR = "TIME_WINDOW_SIZE_MS";
     private final Properties properties;
     private final Serde<Event> eventSerde;
     private final Serde<String> stringSerde;
@@ -47,7 +47,7 @@ public class StreamProcessor {
         this.properties.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "stream-processor");
         this.properties.putIfAbsent(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, System.getenv(BOOTSTRAP_SERVER_ENV_VAR));
         this.operationType = OPERATION_TYPE.valueOf(System.getenv(OPERATION_TYPE_ENV_VAR));
-        this.timeWindowSize = Long.parseLong(System.getenv(TIME_WINDOW_SIZE_ENV_VAR));
+        this.timeWindowSize = Long.parseLong(System.getenv(TIME_WINDOW_SIZE_MS_ENV_VAR));
     }
 
     public void processEvents() {

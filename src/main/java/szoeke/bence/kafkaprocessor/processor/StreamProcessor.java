@@ -122,13 +122,10 @@ public class StreamProcessor {
     private void startOperations() {
         try (KafkaStreams streams = new KafkaStreams(builder.build(), properties)) {
             final CountDownLatch latch = new CountDownLatch(1);
-            try {
-                streams.start();
-                latch.await();
-            } catch (final Throwable e) {
-                System.exit(1);
-            }
+            streams.start();
+            latch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
-        System.exit(0);
     }
 }

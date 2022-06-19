@@ -36,7 +36,7 @@ public class StreamProcessor {
 
     public StreamProcessor(ObjectMapper objectMapper) {
         this.jsonNodeSerde = Serdes.serdeFrom(new JsonNodeSerializer(objectMapper), new JsonNodeDeserializer(objectMapper));
-        this.stringSerde = Serdes.String();//try VoidSerde
+        this.stringSerde = Serdes.String();
         this.builder = new StreamsBuilder();
         this.properties = new Properties();
         this.properties.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "stream-processor");

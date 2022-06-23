@@ -42,6 +42,7 @@ public final class JsonNodeProcessor {
         ObjectNode objectNodeEvent = (ObjectNode) event;
         ArrayNode modifiedSipMessages = StreamSupport
                 .stream(objectNodeEvent.get(EVENT_INFO).get(SIP_MESSAGES).spliterator(), true)
+                .parallel()
                 .map(JsonNodeProcessor::mapSipMessage)
                 .collect(toJsonNode());
         ((ObjectNode) objectNodeEvent.get(EVENT_INFO)).replace(SIP_MESSAGES, modifiedSipMessages);
@@ -52,6 +53,7 @@ public final class JsonNodeProcessor {
         ObjectNode objectNodeSipMessage = (ObjectNode) sipMessage;
         ArrayNode modifiedHeaderFields = StreamSupport
                 .stream(objectNodeSipMessage.get(HEADER_FIELDS).spliterator(), true)
+                .parallel()
                 .filter(headerField -> !IGNORABLE_FIELD_NAMES.contains(headerField.get("Name").asText()))
                 .collect(toJsonNode());
         objectNodeSipMessage.replace(HEADER_FIELDS, modifiedHeaderFields);

@@ -8,8 +8,6 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import szoeke.bence.kafkaprocessor.utility.JsonNodeDeserializer;
 import szoeke.bence.kafkaprocessor.utility.JsonNodeSerializer;
 
@@ -24,7 +22,6 @@ public class StreamProcessor {
         STATEFUL
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StreamProcessor.class);
     private static final String INPUT_TOPIC = "streams-input";
     private static final String OUTPUT_TOPIC = "streams-output";
     private static final String OPERATION_TYPE_ENV_VAR = "OPERATION_TYPE";
@@ -36,7 +33,6 @@ public class StreamProcessor {
     private final StreamsBuilder builder;
     private final OPERATION_TYPE operationType;
     private final long timeWindowSize;
-    private long maxSequenceNumber = 0;
 
     public StreamProcessor(ObjectMapper objectMapper) {
         this.jsonNodeSerde = Serdes.serdeFrom(new JsonNodeSerializer(objectMapper), new JsonNodeDeserializer(objectMapper));
@@ -73,16 +69,7 @@ public class StreamProcessor {
                 .filter(JsonNodeProcessor::filterEventRecordHeaderByResult)
                 .map(JsonNodeProcessor::removeKeyIdsFromEventRecordHeader)
                 .map(JsonNodeProcessor::mapHeaderFieldName)
-                .peek(this::logSequenceNumber)
                 .to(OUTPUT_TOPIC, Produced.with(stringSerde, jsonNodeSerde));
-    }
-
-    private void logSequenceNumber(String key, JsonNode value) {
-        long keyNumber = Long.parseLong(key);
-        if (keyNumber > maxSequenceNumber) {
-            maxSequenceNumber = keyNumber;
-            LOGGER.info("Max key: {}", key);
-        }
     }
 
     private void defineWindowedByAndCountOperations() {

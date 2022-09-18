@@ -20,14 +20,14 @@ public class StreamProcessor {
     private static final String OUTPUT_TOPIC = "streams-output";
     private final Properties properties;
     private final JsonNodeProcessor jsonNodeProcessor;
-    private final Serde<Void> voidSerde;
+    private final Serde<String> stringSerde;
     private final Serde<JsonNode> jsonNodeSerde;
     private final StreamsBuilder builder;
 
     public StreamProcessor(Properties properties, JsonNodeProcessor jsonNodeProcessor, ObjectMapper objectMapper) {
         this.properties = properties;
         this.jsonNodeProcessor = jsonNodeProcessor;
-        this.voidSerde = Serdes.Void();
+        this.stringSerde = Serdes.String();
         this.jsonNodeSerde = Serdes.serdeFrom(
                 new JsonNodeSerializer(objectMapper),
                 new JsonNodeDeserializer(objectMapper));
@@ -41,9 +41,9 @@ public class StreamProcessor {
 
     private void defineFilterOperations() {
         builder
-                .stream(INPUT_TOPIC, Consumed.with(voidSerde, jsonNodeSerde))
+                .stream(INPUT_TOPIC, Consumed.with(stringSerde, jsonNodeSerde))
                 .filter(jsonNodeProcessor::filter)
-                .to(OUTPUT_TOPIC, Produced.with(voidSerde, jsonNodeSerde));
+                .to(OUTPUT_TOPIC, Produced.with(stringSerde, jsonNodeSerde));
     }
 
     private void startOperations() {

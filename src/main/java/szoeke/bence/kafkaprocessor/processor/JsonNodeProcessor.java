@@ -11,7 +11,7 @@ public final class JsonNodeProcessor {
         this.filterData = filterData;
     }
 
-    boolean filter(Void unused, JsonNode jsonNode) {
+    boolean filter(String unused, JsonNode jsonNode) {
         return filterData.values.stream().anyMatch(jsonNode.at(filterData.path).asText()::equals);
     }
 }

@@ -12,6 +12,6 @@ public final class JsonNodeProcessor {
     }
 
     boolean filter(String unused, JsonNode jsonNode) {
-        return filterData.values.stream().anyMatch(jsonNode.at(filterData.path).asText()::equals);
+        return filterData.values.contains(jsonNode.at(filterData.path).asText());
     }
 }

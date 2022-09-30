@@ -11,43 +11,34 @@ import java.util.Set;
 public class JsonNodeProcessorUnitTest {
 
     @Test
-    public void filterTest() throws JsonProcessingException {
+    public void filterKeepTest() throws JsonProcessingException {
         final String testJson = "{" +
-                "  \"jsonNode0\": [" +
-                "    {" +
-                "      \"jsonNode0\": \"jsonNode0\"" +
-                "    }," +
-                "    {" +
-                "      \"jsonNode1\": \"jsonNode1\"" +
+                "    \"eventRecordHeader\": {" +
+                "        \"KeyIds\": {" +
+                "            \"ServedUser\": \"<priv1>sip:0123456789@abc.abc012.acb123.567asdfgh.jkl</priv1>\"" +
+                "        }" +
                 "    }" +
-                "  ]," +
-                "  \"jsonNode1\": {" +
-                "    \"jsonNode0\": {" +
-                "      \"jsonNode3\": \"jsonNode3\"" +
-                "    }," +
-                "    \"jsonNode1\": {" +
-                "      \"jsonNode3\": \"jsonNode3\"" +
-                "    }," +
-                "    \"jsonNode2\": {" +
-                "      \"jsonNode3\": \"jsonNode3\"," +
-                "      \"jsonNode4\": \"jsonNode4\"," +
-                "      \"jsonNode5\": \"2\"," +
-                "      \"jsonNode6\": \"jsonNode6\"" +
-                "    }" +
-                "  }," +
-                "  \"jsonNode3\": [" +
-                "    {" +
-                "      \"jsonNode0\": \"jsonNode0\"" +
-                "    }," +
-                "    {" +
-                "      \"jsonNode1\": \"jsonNode1\"" +
-                "    }" +
-                "  ]" +
                 "}";
         FilterData filterData = new FilterData()
-                .setPath("/jsonNode1/jsonNode2/jsonNode5")
-                .setValues(Set.of("1", "2"));
+                .setPath("/eventRecordHeader/KeyIds/ServedUser")
+                .setValues(Set.of("NoMatchForThis", "0123456789"));
         JsonNodeProcessor jsonNodeProcessor = new JsonNodeProcessor(filterData);
         Assert.assertTrue(jsonNodeProcessor.filter(null, new ObjectMapper().readTree(testJson)));
+    }
+
+    @Test
+    public void filterDropTest() throws JsonProcessingException {
+        final String testJson = "{" +
+                "    \"eventRecordHeader\": {" +
+                "        \"KeyIds\": {" +
+                "            \"ServedUser\": \"<priv1>sip:0123456789@abc.abc012.acb123.567asdfgh.jkl</priv1>\"" +
+                "        }" +
+                "    }" +
+                "}";
+        FilterData filterData = new FilterData()
+                .setPath("/eventRecordHeader/KeyIds/ServedUser")
+                .setValues(Set.of("NoMatchForThis1", "NoMatchForThis2"));
+        JsonNodeProcessor jsonNodeProcessor = new JsonNodeProcessor(filterData);
+        Assert.assertFalse(jsonNodeProcessor.filter(null, new ObjectMapper().readTree(testJson)));
     }
 }

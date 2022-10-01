@@ -1,19 +1,24 @@
 package szoeke.bence.kafkaprocessor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import szoeke.bence.kafkaprocessor.config.FilterConfig;
+import szoeke.bence.kafkaprocessor.config.ConditionConfig;
 import szoeke.bence.kafkaprocessor.config.KafkaStreamsConfig;
+import szoeke.bence.kafkaprocessor.entity.OperationType;
 import szoeke.bence.kafkaprocessor.processor.JsonNodeProcessor;
 import szoeke.bence.kafkaprocessor.processor.StreamProcessor;
 
 public class KafkaProcessorApplication {
 
+    private static final String OPERATION_TYPE_ENV_VAR = "OPERATION_TYPE";
+
     public static void main(String[] args) {
-        KafkaStreamsConfig kafkaStreamsConfig = new KafkaStreamsConfig();
+        OperationType operationType = OperationType.valueOf(System.getenv(OPERATION_TYPE_ENV_VAR));
         ObjectMapper objectMapper = new ObjectMapper();
-        FilterConfig filterConfig = new FilterConfig(objectMapper);
-        JsonNodeProcessor jsonNodeProcessor = new JsonNodeProcessor(filterConfig.generateConditions());
-        StreamProcessor processor = new StreamProcessor(kafkaStreamsConfig.generateConfig(), jsonNodeProcessor, objectMapper);
-        processor.processEvents();
+        new StreamProcessor(
+                new KafkaStreamsConfig().generateConfig(),
+                new JsonNodeProcessor(new ConditionConfig(objectMapper, operationType)),
+                objectMapper,
+                operationType
+        ).processEvents();
     }
 }

@@ -4,24 +4,34 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import szoeke.bence.kafkaprocessor.entity.FilterData;
+import szoeke.bence.kafkaprocessor.entity.OperationType;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class FilterConfig {
+import static szoeke.bence.kafkaprocessor.entity.OperationType.FILTER;
+
+public class ConditionConfig {
 
     private static final String OPERATION_CONDITION_ENV_VAR = "OPERATION_CONDITION";
+    private final OperationType operationType;
     private final ObjectMapper objectMapper;
+    private final String operationConditions;
 
-    public FilterConfig(ObjectMapper objectMapper) {
+    public ConditionConfig(ObjectMapper objectMapper, OperationType operationType) {
         this.objectMapper = objectMapper;
+        this.operationType = operationType;
+        this.operationConditions = System.getenv(OPERATION_CONDITION_ENV_VAR);
     }
 
-    public FilterData generateConditions() {
-        final String[] conditionParts = System.getenv(OPERATION_CONDITION_ENV_VAR).split(" in ");
-        return new FilterData()
-                .setPath(conditionParts[0])
-                .setValues(generateValues(conditionParts));
+    public FilterData generateFilterConditions() {
+        if (operationType == FILTER) {
+            final String[] conditionParts = operationConditions.split(" in ");
+            return new FilterData()
+                    .setPath(conditionParts[0])
+                    .setValues(generateValues(conditionParts));
+        }
+        return null;
     }
 
     private Set<String> generateValues(String[] conditionParts) {

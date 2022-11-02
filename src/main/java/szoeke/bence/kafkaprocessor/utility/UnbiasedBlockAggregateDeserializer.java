@@ -11,13 +11,13 @@ import java.util.HashMap;
 import static java.util.Objects.isNull;
 import static szoeke.bence.kafkaprocessor.KafkaProcessorApplication.OBJECT_MAPPER;
 
-public class UnbiasedBlockAggregateDeserializer implements Deserializer<HashMap<String, Long>> {
+public class UnbiasedBlockAggregateDeserializer implements Deserializer<HashMap<Long, Long>> {
 
-    private final TypeReference<HashMap<String, Long>> stringHashMapTypeRef = new TypeReference<>() {
+    private final TypeReference<HashMap<Long, Long>> stringHashMapTypeRef = new TypeReference<>() {
     };
 
     @Override
-    public HashMap<String, Long> deserialize(String str, byte[] data) {
+    public HashMap<Long, Long> deserialize(String str, byte[] data) {
         try {
             return hasNoData(data) ? null : OBJECT_MAPPER.readValue(data, stringHashMapTypeRef);
         } catch (IOException e) {
@@ -26,7 +26,7 @@ public class UnbiasedBlockAggregateDeserializer implements Deserializer<HashMap<
     }
 
     @Override
-    public HashMap<String, Long> deserialize(String topic, Headers headers, byte[] data) {
+    public HashMap<Long, Long> deserialize(String topic, Headers headers, byte[] data) {
         return deserialize(null, data);
     }
 

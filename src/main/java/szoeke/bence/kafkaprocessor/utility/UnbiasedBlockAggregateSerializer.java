@@ -9,10 +9,10 @@ import java.util.HashMap;
 
 import static szoeke.bence.kafkaprocessor.KafkaProcessorApplication.OBJECT_MAPPER;
 
-public class UnbiasedBlockAggregateSerializer implements Serializer<HashMap<String, Long>> {
+public class UnbiasedBlockAggregateSerializer implements Serializer<HashMap<Long, Long>> {
 
     @Override
-    public byte[] serialize(String str, HashMap<String, Long> data) {
+    public byte[] serialize(String str, HashMap<Long, Long> data) {
         try {
             return OBJECT_MAPPER.writeValueAsBytes(data);
         } catch (JsonProcessingException e) {
@@ -21,7 +21,7 @@ public class UnbiasedBlockAggregateSerializer implements Serializer<HashMap<Stri
     }
 
     @Override
-    public byte[] serialize(String topic, Headers headers, HashMap<String, Long> data) {
+    public byte[] serialize(String topic, Headers headers, HashMap<Long, Long> data) {
         return serialize(null, data);
     }
 }

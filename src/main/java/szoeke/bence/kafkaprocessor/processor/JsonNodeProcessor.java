@@ -47,12 +47,12 @@ public final class JsonNodeProcessor {
         return aggregate;
     }
 
-    HashMap<String, Long> doUnbiasedBlockAggregation(JsonNode jsonNode, HashMap<String, Long> aggregate) {
+    HashMap<Long, Long> doUnbiasedBlockAggregation(JsonNode jsonNode, HashMap<Long, Long> aggregate) {
         JsonNode cause = jsonNode.get("eventRecordHeader").get("Cause");
         if (nonNull(cause)) {
             JsonNode errorCode = cause.get("ErrorCode");
             if (nonNull(errorCode)) {
-                aggregateErrorCode(aggregate, errorCode.asText());
+                aggregateErrorCode(aggregate, Long.valueOf(errorCode.asText()));
             }
         }
         return aggregate;
@@ -108,11 +108,11 @@ public final class JsonNodeProcessor {
         }
     }
 
-    private void aggregateErrorCode(HashMap<String, Long> aggregate, String errorCodeText) {
-        if (nonNull(aggregate.get(errorCodeText))) {
-            aggregate.replace(errorCodeText, aggregate.get(errorCodeText) + 1L);
+    private void aggregateErrorCode(HashMap<Long, Long> aggregate, Long errorCode) {
+        if (nonNull(aggregate.get(errorCode))) {
+            aggregate.replace(errorCode, aggregate.get(errorCode) + 1L);
         } else {
-            aggregate.put(errorCodeText, 1L);
+            aggregate.put(errorCode, 1L);
         }
     }
 }

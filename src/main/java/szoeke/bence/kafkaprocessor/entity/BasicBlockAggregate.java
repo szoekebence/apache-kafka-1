@@ -14,20 +14,6 @@ public class BasicBlockAggregate {
     public int protocol_diameter_err_starts_4;
     public int protocol_diameter_err_starts_5;
 
-    public BasicBlockAggregate(BasicBlockAggregate aggregate) {
-        this.failed_result = aggregate.failed_result;
-        this.successful_result = aggregate.successful_result;
-        this.err_starts_4 = aggregate.err_starts_4;
-        this.err_starts_5 = aggregate.err_starts_5;
-        this.err_starts_6 = aggregate.err_starts_6;
-        this.has_sub_cause = aggregate.has_sub_cause;
-        this.protocol_dns = aggregate.protocol_dns;
-        this.protocol_diameter = aggregate.protocol_diameter;
-        this.protocol_diameter_err_starts_3 = aggregate.protocol_diameter_err_starts_3;
-        this.protocol_diameter_err_starts_4 = aggregate.protocol_diameter_err_starts_4;
-        this.protocol_diameter_err_starts_5 = aggregate.protocol_diameter_err_starts_5;
-    }
-
     public BasicBlockAggregate() {
         this.failed_result = 0;
         this.successful_result = 0;

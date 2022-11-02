@@ -9,8 +9,7 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
 import szoeke.bence.kafkaprocessor.entity.BasicBlockAggregate;
 import szoeke.bence.kafkaprocessor.entity.OperationType;
-import szoeke.bence.kafkaprocessor.utility.BasicBlockAggregateDeserializer;
-import szoeke.bence.kafkaprocessor.utility.BasicBlockAggregateSerializer;
+import szoeke.bence.kafkaprocessor.utility.BasicBlockAggregateSerde;
 import szoeke.bence.kafkaprocessor.utility.JsonNodeDeserializer;
 import szoeke.bence.kafkaprocessor.utility.JsonNodeSerializer;
 
@@ -28,7 +27,7 @@ public class StreamProcessor {
     private final Serde<String> stringSerde;
     private final Serde<JsonNode> jsonNodeSerde;
     private final StreamsBuilder builder;
-    private final Serde<BasicBlockAggregate> basicBlockAggregatonSerde;
+    private final Serde<BasicBlockAggregate> basicBlockAggregateSerde;
 
     public StreamProcessor(Properties properties, JsonNodeProcessor jsonNodeProcessor,
                            OperationType operationType) {
@@ -36,12 +35,8 @@ public class StreamProcessor {
         this.jsonNodeProcessor = jsonNodeProcessor;
         this.operationType = operationType;
         this.stringSerde = Serdes.String();
-        this.jsonNodeSerde = Serdes.serdeFrom(
-                new JsonNodeSerializer(),
-                new JsonNodeDeserializer());
-        this.basicBlockAggregatonSerde = Serdes.serdeFrom(
-                new BasicBlockAggregateSerializer(),
-                new BasicBlockAggregateDeserializer());
+        this.jsonNodeSerde = Serdes.serdeFrom(new JsonNodeSerializer(), new JsonNodeDeserializer());
+        this.basicBlockAggregateSerde = new BasicBlockAggregateSerde();
         this.builder = new StreamsBuilder();
     }
 
@@ -91,7 +86,7 @@ public class StreamProcessor {
                 .aggregate(
                         BasicBlockAggregate::new,
                         (k, v, aggV) -> jsonNodeProcessor.doBasicBlockAggregation(v, aggV),
-                        Materialized.with(stringSerde, basicBlockAggregatonSerde))
+                        Materialized.with(stringSerde, basicBlockAggregateSerde))
                 .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded()))
                 .toStream()
                 .to(OUTPUT_TOPIC);

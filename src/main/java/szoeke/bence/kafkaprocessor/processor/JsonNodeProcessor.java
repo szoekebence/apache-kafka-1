@@ -22,7 +22,7 @@ public final class JsonNodeProcessor {
         return filterData.values.stream().anyMatch(jsonNode.at(filterData.path).asText()::contains);
     }
 
-    public String anonymization(JsonNode jsonNode) {
+    String anonymization(JsonNode jsonNode) {
         String servedUser = jsonNode
                 .get("eventRecordHeader")
                 .get("KeyIds")
@@ -32,11 +32,11 @@ public final class JsonNodeProcessor {
         return jsonNode.toString().replaceAll(sensitiveData, "xxxxxx");
     }
 
-    public String getEventId(JsonNode jsonNode) {
+    String getEventId(JsonNode jsonNode) {
         return jsonNode.get("eventRecordHeader").get("EventId").asText();
     }
 
-    public BasicBlockAggregate doBasicBlockAggregation(JsonNode jsonNode, BasicBlockAggregate aggregate) {
+    BasicBlockAggregate doBasicBlockAggregation(JsonNode jsonNode, BasicBlockAggregate aggregate) {
         JsonNode eventRecordHeader = jsonNode.get("eventRecordHeader");
         if ("1".equals(eventRecordHeader.get("Result").asText())) {
             aggregate.failed_result++;
@@ -47,7 +47,7 @@ public final class JsonNodeProcessor {
         return aggregate;
     }
 
-    public HashMap<String, Long> doUnbiasedBlockAggregation(JsonNode jsonNode, HashMap<String, Long> aggregate) {
+    HashMap<String, Long> doUnbiasedBlockAggregation(JsonNode jsonNode, HashMap<String, Long> aggregate) {
         JsonNode cause = jsonNode.get("eventRecordHeader").get("Cause");
         if (nonNull(cause)) {
             JsonNode errorCode = cause.get("ErrorCode");
@@ -58,7 +58,7 @@ public final class JsonNodeProcessor {
         return aggregate;
     }
 
-    public AverageBlockAggregate doAverageBlockAggregation(JsonNode jsonNode, AverageBlockAggregate aggregate) {
+    AverageBlockAggregate doAverageBlockAggregation(JsonNode jsonNode, AverageBlockAggregate aggregate) {
         long endTime = jsonNode.get("eventRecordHeader").get("EndTime").asLong();
         long startTime = jsonNode.get("eventRecordHeader").get("StartTime").asLong();
         aggregate.numberOfEvents++;

@@ -9,15 +9,14 @@ import szoeke.bence.kafkaprocessor.processor.StreamProcessor;
 
 public class KafkaProcessorApplication {
 
+    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String OPERATION_TYPE_ENV_VAR = "OPERATION_TYPE";
 
     public static void main(String[] args) {
         OperationType operationType = OperationType.valueOf(System.getenv(OPERATION_TYPE_ENV_VAR));
-        ObjectMapper objectMapper = new ObjectMapper();
         new StreamProcessor(
-                new KafkaStreamsConfig().generateConfig(),
-                new JsonNodeProcessor(new ConditionConfig(objectMapper, operationType)),
-                objectMapper,
+                new KafkaStreamsConfig(operationType).generateConfig(),
+                new JsonNodeProcessor(new ConditionConfig(operationType)),
                 operationType
         ).processEvents();
     }

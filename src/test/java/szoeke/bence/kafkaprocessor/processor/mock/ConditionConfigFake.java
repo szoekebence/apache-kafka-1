@@ -8,7 +8,7 @@ public class ConditionConfigFake extends ConditionConfig {
     public FilterData result;
 
     public ConditionConfigFake() {
-        super(null, null);
+        super(null);
     }
 
     @Override

@@ -12,7 +12,7 @@ public final class JsonNodeProcessor {
         this.filterData = conditionConfig.generateFilterConditions();
     }
 
-    boolean filter(JsonNode jsonNode) {
+    public boolean filter(JsonNode jsonNode) {
         return filterData.values.stream().anyMatch(jsonNode.at(filterData.path).asText()::contains);
     }
 

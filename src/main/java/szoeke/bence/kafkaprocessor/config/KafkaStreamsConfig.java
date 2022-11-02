@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsConfig;
 import szoeke.bence.kafkaprocessor.entity.OperationType;
-import szoeke.bence.kafkaprocessor.utility.BasicBlockAggregationSerde;
+import szoeke.bence.kafkaprocessor.utility.BasicBlockAggregateSerde;
 
 import java.util.Properties;
 
@@ -33,7 +33,7 @@ public class KafkaStreamsConfig {
     private void setBasicBlockAggregationSerdes(Properties properties) {
         if (operationType == OperationType.BASIC_BLOCK_AGGREGATION) {
             properties.setProperty(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-            properties.setProperty(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, BasicBlockAggregationSerde.class.getName());
+            properties.setProperty(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, BasicBlockAggregateSerde.class.getName());
         }
     }
 

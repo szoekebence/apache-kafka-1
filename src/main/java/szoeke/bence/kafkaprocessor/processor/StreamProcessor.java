@@ -9,7 +9,7 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
 import szoeke.bence.kafkaprocessor.entity.BasicBlockAggregate;
 import szoeke.bence.kafkaprocessor.entity.OperationType;
-import szoeke.bence.kafkaprocessor.utility.BasicBlockAggregationSerde;
+import szoeke.bence.kafkaprocessor.utility.BasicBlockAggregateSerde;
 import szoeke.bence.kafkaprocessor.utility.JsonNodeDeserializer;
 import szoeke.bence.kafkaprocessor.utility.JsonNodeSerializer;
 
@@ -36,7 +36,7 @@ public class StreamProcessor {
         this.operationType = operationType;
         this.stringSerde = Serdes.String();
         this.jsonNodeSerde = Serdes.serdeFrom(new JsonNodeSerializer(), new JsonNodeDeserializer());
-        this.basicBlockAggregateSerde = new BasicBlockAggregationSerde();
+        this.basicBlockAggregateSerde = new BasicBlockAggregateSerde();
         this.builder = new StreamsBuilder();
     }
 

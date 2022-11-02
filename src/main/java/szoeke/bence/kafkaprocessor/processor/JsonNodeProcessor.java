@@ -19,7 +19,7 @@ public final class JsonNodeProcessor {
         return filterData.values.stream().anyMatch(jsonNode.at(filterData.path).asText()::contains);
     }
 
-    public String anonymization(JsonNode jsonNode) {
+    String anonymization(JsonNode jsonNode) {
         String servedUser = jsonNode
                 .get("eventRecordHeader")
                 .get("KeyIds")
@@ -29,11 +29,11 @@ public final class JsonNodeProcessor {
         return jsonNode.toString().replaceAll(sensitiveData, "xxxxxx");
     }
 
-    public String getEventId(JsonNode jsonNode) {
+    String getEventId(JsonNode jsonNode) {
         return jsonNode.get("eventRecordHeader").get("EventId").asText();
     }
 
-    public BasicBlockAggregate doBasicBlockAggregation(JsonNode jsonNode, BasicBlockAggregate aggregate) {
+    BasicBlockAggregate doBasicBlockAggregation(JsonNode jsonNode, BasicBlockAggregate aggregate) {
         JsonNode eventRecordHeader = jsonNode.get("eventRecordHeader");
         if ("1".equals(eventRecordHeader.get("Result").asText())) {
             aggregate.failed_result++;

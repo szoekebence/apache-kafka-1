@@ -26,7 +26,6 @@ public class KafkaStreamsConfig {
         properties.setProperty(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, System.getenv(BOOTSTRAP_SERVER_ENV_VAR));
         properties.setProperty(StreamsConfig.NUM_STREAM_THREADS_CONFIG, System.getenv(NUM_STREAM_THREADS_ENV_VAR));
         setBasicBlockAggregationSerdes(properties);
-//        setUnbiasedBlockAggregationSerdes(properties);
         setOptionalParameters(properties);
         return properties;
     }
@@ -37,13 +36,6 @@ public class KafkaStreamsConfig {
             properties.setProperty(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, BasicBlockAggregationSerde.class.getName());
         }
     }
-
-//    private void setUnbiasedBlockAggregationSerdes(Properties properties) {
-//        if (operationType == OperationType.UNBIASED_BLOCK_AGGREGATION) {
-//            properties.setProperty(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-//            properties.setProperty(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, UnbiasedBlockAggregationSerde.class.getName());
-//        }
-//    }
 
     private void setOptionalParameters(Properties properties) {
         String metricsRecordingLevel = System.getenv(METRICS_RECORDING_LEVEL_CONFIG_ENV_VAR);

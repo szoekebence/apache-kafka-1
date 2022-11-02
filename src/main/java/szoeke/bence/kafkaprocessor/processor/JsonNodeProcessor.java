@@ -2,11 +2,8 @@ package szoeke.bence.kafkaprocessor.processor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import szoeke.bence.kafkaprocessor.config.ConditionConfig;
-import szoeke.bence.kafkaprocessor.entity.AverageBlockAggregate;
 import szoeke.bence.kafkaprocessor.entity.BasicBlockAggregate;
 import szoeke.bence.kafkaprocessor.entity.FilterData;
-
-import java.util.HashMap;
 
 import static java.util.Objects.nonNull;
 
@@ -44,25 +41,6 @@ public final class JsonNodeProcessor {
         } else {
             aggregate.successful_result++;
         }
-        return aggregate;
-    }
-
-    public HashMap<String, Long> doUnbiasedBlockAggregation(JsonNode jsonNode, HashMap<String, Long> aggregate) {
-        JsonNode cause = jsonNode.get("eventRecordHeader").get("Cause");
-        if (nonNull(cause)) {
-            JsonNode errorCode = cause.get("ErrorCode");
-            if (nonNull(errorCode)) {
-                aggregateErrorCode(aggregate, errorCode.asText());
-            }
-        }
-        return aggregate;
-    }
-
-    public AverageBlockAggregate doAverageBlockAggregation(JsonNode jsonNode, AverageBlockAggregate aggregate) {
-        long endTime = jsonNode.get("eventRecordHeader").get("EndTime").asLong();
-        long startTime = jsonNode.get("eventRecordHeader").get("StartTime").asLong();
-        aggregate.numberOfEvents++;
-        aggregate.sumOfTimeDiffs += endTime - startTime;
         return aggregate;
     }
 
@@ -105,14 +83,6 @@ public final class JsonNodeProcessor {
             aggregate.protocol_diameter_err_starts_4++;
         } else if (subErrorText.startsWith("5")) {
             aggregate.protocol_diameter_err_starts_5++;
-        }
-    }
-
-    private void aggregateErrorCode(HashMap<String, Long> aggregate, String errorCodeText) {
-        if (nonNull(aggregate.get(errorCodeText))) {
-            aggregate.replace(errorCodeText, aggregate.get(errorCodeText) + 1L);
-        } else {
-            aggregate.put(errorCodeText, 1L);
         }
     }
 }

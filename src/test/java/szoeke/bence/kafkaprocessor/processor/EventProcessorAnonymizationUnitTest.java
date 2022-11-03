@@ -7,14 +7,14 @@ import org.junit.Assert;
 import org.junit.Test;
 import szoeke.bence.kafkaprocessor.processor.mock.ConditionConfigFake;
 
-public class JsonNodeProcessorAnonymizationUnitTest {
+public class EventProcessorAnonymizationUnitTest {
 
     private ObjectMapper objectMapper;
 
     @Test
     public void anonymizationTest() throws JsonProcessingException {
         objectMapper = new ObjectMapper();
-        JsonNodeProcessor jsonNodeProcessor = new JsonNodeProcessor(new ConditionConfigFake());
+        EventProcessor jsonNodeProcessor = new EventProcessor(new ConditionConfigFake());
         Assert.assertEquals(
                 generateAnonymizationResult(),
                 jsonNodeProcessor.anonymization(generateJsonNodeToAnonymization()));

@@ -1,4 +1,4 @@
-package szoeke.bence.kafkaprocessor.utility;
+package szoeke.bence.kafkaprocessor.serde.basicblockaggregation;
 
 import org.apache.kafka.common.serialization.Serdes;
 import szoeke.bence.kafkaprocessor.entity.BasicBlockAggregate;

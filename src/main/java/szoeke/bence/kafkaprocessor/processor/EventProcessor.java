@@ -10,11 +10,11 @@ import java.util.HashMap;
 
 import static java.util.Objects.nonNull;
 
-public final class JsonNodeProcessor {
+public final class EventProcessor {
 
     private final FilterData filterData;
 
-    public JsonNodeProcessor(ConditionConfig conditionConfig) {
+    public EventProcessor(ConditionConfig conditionConfig) {
         this.filterData = conditionConfig.generateFilterConditions();
     }
 
@@ -52,7 +52,7 @@ public final class JsonNodeProcessor {
         if (nonNull(cause)) {
             JsonNode errorCode = cause.get("ErrorCode");
             if (nonNull(errorCode)) {
-                aggregateErrorCode(aggregate, Long.valueOf(errorCode.asText()));
+                aggregateErrorCode(aggregate, errorCode.asLong());
             }
         }
         return aggregate;
@@ -62,8 +62,12 @@ public final class JsonNodeProcessor {
         long endTime = jsonNode.get("eventRecordHeader").get("EndTime").asLong();
         long startTime = jsonNode.get("eventRecordHeader").get("StartTime").asLong();
         aggregate.numberOfEvents++;
-        aggregate.sumOfTimeDiffs += endTime - startTime;
+        aggregate.sumOfDurations += endTime - startTime;
         return aggregate;
+    }
+
+    Float calcAverageBlockAggregation(AverageBlockAggregate aggregate) {
+        return aggregate.sumOfDurations / aggregate.numberOfEvents;
     }
 
     private void aggregateCause(JsonNode cause, BasicBlockAggregate aggregate) {

@@ -1,4 +1,4 @@
-package szoeke.bence.kafkaprocessor.utility;
+package szoeke.bence.kafkaprocessor.serde.unbiasedblockaggregation;
 
 import org.apache.kafka.common.serialization.Serdes;
 

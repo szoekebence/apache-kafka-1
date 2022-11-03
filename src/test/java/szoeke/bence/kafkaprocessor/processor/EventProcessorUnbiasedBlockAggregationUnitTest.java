@@ -10,17 +10,17 @@ import szoeke.bence.kafkaprocessor.processor.mock.ConditionConfigFake;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JsonNodeProcessorUnbiasedBlockAggregationUnitTest {
+public class EventProcessorUnbiasedBlockAggregationUnitTest {
 
     private static final String ERRORCODE_400_JSON = "{\"eventRecordHeader\":{\"Result\":1,\"Cause\":{\"ErrorCode\":400}}}";
     private static final String ERRORCODE_500_JSON = "{\"eventRecordHeader\":{\"Result\":1,\"Cause\":{\"ErrorCode\":500}}}";
-    private JsonNodeProcessor jsonNodeProcessor;
+    private EventProcessor jsonNodeProcessor;
     private ObjectMapper objectMapper;
 
     @Before
     public void setUp() {
         objectMapper = new ObjectMapper();
-        jsonNodeProcessor = new JsonNodeProcessor(new ConditionConfigFake());
+        jsonNodeProcessor = new EventProcessor(new ConditionConfigFake());
     }
 
     @Test

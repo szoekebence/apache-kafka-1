@@ -11,9 +11,9 @@ import szoeke.bence.kafkaprocessor.processor.mock.ConditionConfigFake;
 
 import java.util.Set;
 
-public class JsonNodeProcessorFilterUnitTest {
+public class EventProcessorFilterUnitTest {
 
-    private JsonNodeProcessor jsonNodeProcessor;
+    private EventProcessor jsonNodeProcessor;
     private ConditionConfigFake conditionConfig;
     private ObjectMapper objectMapper;
 
@@ -28,7 +28,7 @@ public class JsonNodeProcessorFilterUnitTest {
         conditionConfig.result = new FilterData()
                 .setPath("/eventRecordHeader/KeyIds/ServedUser")
                 .setValues(Set.of("NoMatchForThis", "012345678910"));
-        jsonNodeProcessor = new JsonNodeProcessor(conditionConfig);
+        jsonNodeProcessor = new EventProcessor(conditionConfig);
 
         Assert.assertTrue(jsonNodeProcessor.filter(generateJsonNodeToBeFiltered()));
     }
@@ -38,7 +38,7 @@ public class JsonNodeProcessorFilterUnitTest {
         conditionConfig.result = new FilterData()
                 .setPath("/eventRecordHeader/KeyIds/ServedUser")
                 .setValues(Set.of("NoMatchForThis1", "NoMatchForThis2"));
-        jsonNodeProcessor = new JsonNodeProcessor(conditionConfig);
+        jsonNodeProcessor = new EventProcessor(conditionConfig);
 
         Assert.assertFalse(jsonNodeProcessor
                 .filter(generateJsonNodeToBeFiltered()));

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import szoeke.bence.kafkaprocessor.config.ConditionConfig;
 import szoeke.bence.kafkaprocessor.config.KafkaStreamsConfig;
 import szoeke.bence.kafkaprocessor.entity.OperationType;
-import szoeke.bence.kafkaprocessor.processor.JsonNodeProcessor;
+import szoeke.bence.kafkaprocessor.processor.EventProcessor;
 import szoeke.bence.kafkaprocessor.processor.StreamProcessor;
 
 public class KafkaProcessorApplication {
@@ -16,7 +16,7 @@ public class KafkaProcessorApplication {
         OperationType operationType = OperationType.valueOf(System.getenv(OPERATION_TYPE_ENV_VAR));
         new StreamProcessor(
                 new KafkaStreamsConfig(operationType).generateConfig(),
-                new JsonNodeProcessor(new ConditionConfig(operationType)),
+                new EventProcessor(new ConditionConfig(operationType)),
                 operationType
         ).processEvents();
     }

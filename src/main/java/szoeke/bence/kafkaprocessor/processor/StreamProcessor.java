@@ -26,7 +26,7 @@ public class StreamProcessor {
     private static final String INPUT_TOPIC = "streams-input";
     private static final String OUTPUT_TOPIC = "streams-output";
     private final Properties properties;
-    private final EventProcessor jsonNodeProcessor;
+    private final EventProcessor eventProcessor;
     private final OperationType operationType;
     private final Serde<String> stringSerde;
     private final Serde<JsonNode> jsonNodeSerde;
@@ -35,10 +35,10 @@ public class StreamProcessor {
     private final Serde<HashMap<Long, Long>> unbiasedBlockAggregateSerde;
     private final Serde<AverageBlockAggregate> averageBlockAggregateSerde;
 
-    public StreamProcessor(Properties properties, EventProcessor jsonNodeProcessor,
+    public StreamProcessor(Properties properties, EventProcessor eventProcessor,
                            OperationType operationType) {
         this.properties = properties;
-        this.jsonNodeProcessor = jsonNodeProcessor;
+        this.eventProcessor = eventProcessor;
         this.operationType = operationType;
         this.stringSerde = Serdes.String();
         this.jsonNodeSerde = Serdes.serdeFrom(new JsonNodeSerializer(), new JsonNodeDeserializer());
@@ -76,24 +76,24 @@ public class StreamProcessor {
     private void defineFilterOperations() {
         builder
                 .stream(INPUT_TOPIC, Consumed.with(stringSerde, jsonNodeSerde))
-                .filter((key, value) -> jsonNodeProcessor.filter(value))
+                .filter((key, value) -> eventProcessor.filter(value))
                 .to(OUTPUT_TOPIC, Produced.with(stringSerde, jsonNodeSerde));
     }
 
     private void defineAnonymizationOperations() {
         builder
                 .stream(INPUT_TOPIC, Consumed.with(stringSerde, jsonNodeSerde))
-                .map((key, value) -> new KeyValue<>(key, jsonNodeProcessor.anonymization(value)))
+                .map((key, value) -> new KeyValue<>(key, eventProcessor.anonymization(value)))
                 .to(OUTPUT_TOPIC, Produced.with(stringSerde, stringSerde));
     }
 
     private void defineBasicBlockAggregationOperations() {
         builder.stream(INPUT_TOPIC, Consumed.with(stringSerde, jsonNodeSerde))
-                .groupBy((k, v) -> jsonNodeProcessor.getEventId(v))
+                .groupBy((k, v) -> eventProcessor.getEventId(v))
                 .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(1L)))
                 .aggregate(
                         BasicBlockAggregate::new,
-                        (k, v, aggV) -> jsonNodeProcessor.doBasicBlockAggregation(v, aggV),
+                        (k, v, aggV) -> eventProcessor.doBasicBlockAggregation(v, aggV),
                         Materialized.with(stringSerde, basicBlockAggregateSerde))
                 .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded()))
                 .toStream()
@@ -102,11 +102,11 @@ public class StreamProcessor {
 
     private void defineUnbiasedBlockAggregationOperations() {
         builder.stream(INPUT_TOPIC, Consumed.with(stringSerde, jsonNodeSerde))
-                .groupBy((k, v) -> jsonNodeProcessor.getEventId(v))
+                .groupBy((k, v) -> eventProcessor.getEventId(v))
                 .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(1L)))
                 .aggregate(
                         HashMap::new,
-                        (k, v, aggV) -> jsonNodeProcessor.doUnbiasedBlockAggregation(v, aggV),
+                        (k, v, aggV) -> eventProcessor.doUnbiasedBlockAggregation(v, aggV),
                         Materialized.with(stringSerde, unbiasedBlockAggregateSerde))
                 .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded()))
                 .toStream()
@@ -115,14 +115,14 @@ public class StreamProcessor {
 
     private void defineAveragingBlockAggregationOperations() {
         builder.stream(INPUT_TOPIC, Consumed.with(stringSerde, jsonNodeSerde))
-                .groupBy((k, v) -> jsonNodeProcessor.getEventId(v))
+                .groupBy((k, v) -> eventProcessor.getEventId(v))
                 .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(1L)))
                 .aggregate(
                         AverageBlockAggregate::new,
-                        (k, v, aggV) -> jsonNodeProcessor.doAverageBlockAggregation(v, aggV),
+                        (k, v, aggV) -> eventProcessor.doAverageBlockAggregation(v, aggV),
                         Materialized.with(stringSerde, averageBlockAggregateSerde))
                 .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded()))
-                .mapValues(jsonNodeProcessor::calcAverageBlockAggregation)
+                .mapValues(eventProcessor::calcAverageBlockAggregation)
                 .toStream()
                 .to(OUTPUT_TOPIC);
     }

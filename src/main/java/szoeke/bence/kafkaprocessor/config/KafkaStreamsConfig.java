@@ -4,7 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsConfig;
 import szoeke.bence.kafkaprocessor.entity.OperationType;
-import szoeke.bence.kafkaprocessor.utility.BasicBlockAggregateSerde;
+import szoeke.bence.kafkaprocessor.serde.basicblockaggregation.BasicBlockAggregateSerde;
+import szoeke.bence.kafkaprocessor.serde.unbiasedblockaggregation.UnbiasedBlockAggregateSerde;
 
 import java.util.Properties;
 
@@ -26,6 +27,8 @@ public class KafkaStreamsConfig {
         properties.setProperty(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, System.getenv(BOOTSTRAP_SERVER_ENV_VAR));
         properties.setProperty(StreamsConfig.NUM_STREAM_THREADS_CONFIG, System.getenv(NUM_STREAM_THREADS_ENV_VAR));
         setBasicBlockAggregationSerdes(properties);
+        setUnbiasedBlockAggregationSerdes(properties);
+        setAverageBlockAggregationSerdes(properties);
         setOptionalParameters(properties);
         return properties;
     }
@@ -34,6 +37,20 @@ public class KafkaStreamsConfig {
         if (operationType == OperationType.BASIC_BLOCK_AGGREGATION) {
             properties.setProperty(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
             properties.setProperty(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, BasicBlockAggregateSerde.class.getName());
+        }
+    }
+
+    private void setUnbiasedBlockAggregationSerdes(Properties properties) {
+        if (operationType == OperationType.UNBIASED_BLOCK_AGGREGATION) {
+            properties.setProperty(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+            properties.setProperty(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, UnbiasedBlockAggregateSerde.class.getName());
+        }
+    }
+
+    private void setAverageBlockAggregationSerdes(Properties properties) {
+        if (operationType == OperationType.AVERAGING_BLOCK_AGGREGATION) {
+            properties.setProperty(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+            properties.setProperty(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.Float().getClass().getName());
         }
     }
 

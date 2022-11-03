@@ -7,13 +7,17 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
+import szoeke.bence.kafkaprocessor.entity.AverageBlockAggregate;
 import szoeke.bence.kafkaprocessor.entity.BasicBlockAggregate;
 import szoeke.bence.kafkaprocessor.entity.OperationType;
-import szoeke.bence.kafkaprocessor.utility.BasicBlockAggregateSerde;
-import szoeke.bence.kafkaprocessor.utility.JsonNodeDeserializer;
-import szoeke.bence.kafkaprocessor.utility.JsonNodeSerializer;
+import szoeke.bence.kafkaprocessor.serde.averageblockaggregtion.AverageBlockAggregateSerde;
+import szoeke.bence.kafkaprocessor.serde.basicblockaggregation.BasicBlockAggregateSerde;
+import szoeke.bence.kafkaprocessor.serde.jsonnode.JsonNodeDeserializer;
+import szoeke.bence.kafkaprocessor.serde.jsonnode.JsonNodeSerializer;
+import szoeke.bence.kafkaprocessor.serde.unbiasedblockaggregation.UnbiasedBlockAggregateSerde;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
@@ -22,14 +26,16 @@ public class StreamProcessor {
     private static final String INPUT_TOPIC = "streams-input";
     private static final String OUTPUT_TOPIC = "streams-output";
     private final Properties properties;
-    private final JsonNodeProcessor jsonNodeProcessor;
+    private final EventProcessor jsonNodeProcessor;
     private final OperationType operationType;
     private final Serde<String> stringSerde;
     private final Serde<JsonNode> jsonNodeSerde;
-    private final Serde<BasicBlockAggregate> basicBlockAggregateSerde;
     private final StreamsBuilder builder;
+    private final Serde<BasicBlockAggregate> basicBlockAggregateSerde;
+    private final Serde<HashMap<Long, Long>> unbiasedBlockAggregateSerde;
+    private final Serde<AverageBlockAggregate> averageBlockAggregateSerde;
 
-    public StreamProcessor(Properties properties, JsonNodeProcessor jsonNodeProcessor,
+    public StreamProcessor(Properties properties, EventProcessor jsonNodeProcessor,
                            OperationType operationType) {
         this.properties = properties;
         this.jsonNodeProcessor = jsonNodeProcessor;
@@ -37,6 +43,8 @@ public class StreamProcessor {
         this.stringSerde = Serdes.String();
         this.jsonNodeSerde = Serdes.serdeFrom(new JsonNodeSerializer(), new JsonNodeDeserializer());
         this.basicBlockAggregateSerde = new BasicBlockAggregateSerde();
+        this.unbiasedBlockAggregateSerde = new UnbiasedBlockAggregateSerde();
+        this.averageBlockAggregateSerde = new AverageBlockAggregateSerde();
         this.builder = new StreamsBuilder();
     }
 
@@ -55,6 +63,12 @@ public class StreamProcessor {
                 break;
             case BASIC_BLOCK_AGGREGATION:
                 defineBasicBlockAggregationOperations();
+                break;
+            case UNBIASED_BLOCK_AGGREGATION:
+                defineUnbiasedBlockAggregationOperations();
+                break;
+            case AVERAGING_BLOCK_AGGREGATION:
+                defineAveragingBlockAggregationOperations();
                 break;
         }
     }
@@ -82,6 +96,33 @@ public class StreamProcessor {
                         (k, v, aggV) -> jsonNodeProcessor.doBasicBlockAggregation(v, aggV),
                         Materialized.with(stringSerde, basicBlockAggregateSerde))
                 .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded()))
+                .toStream()
+                .to(OUTPUT_TOPIC);
+    }
+
+    private void defineUnbiasedBlockAggregationOperations() {
+        builder.stream(INPUT_TOPIC, Consumed.with(stringSerde, jsonNodeSerde))
+                .groupBy((k, v) -> jsonNodeProcessor.getEventId(v))
+                .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(1L)))
+                .aggregate(
+                        HashMap::new,
+                        (k, v, aggV) -> jsonNodeProcessor.doUnbiasedBlockAggregation(v, aggV),
+                        Materialized.with(stringSerde, unbiasedBlockAggregateSerde))
+                .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded()))
+                .toStream()
+                .to(OUTPUT_TOPIC);
+    }
+
+    private void defineAveragingBlockAggregationOperations() {
+        builder.stream(INPUT_TOPIC, Consumed.with(stringSerde, jsonNodeSerde))
+                .groupBy((k, v) -> jsonNodeProcessor.getEventId(v))
+                .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(1L)))
+                .aggregate(
+                        AverageBlockAggregate::new,
+                        (k, v, aggV) -> jsonNodeProcessor.doAverageBlockAggregation(v, aggV),
+                        Materialized.with(stringSerde, averageBlockAggregateSerde))
+                .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded()))
+                .mapValues(jsonNodeProcessor::calcAverageBlockAggregation)
                 .toStream()
                 .to(OUTPUT_TOPIC);
     }

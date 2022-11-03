@@ -1,28 +1,28 @@
-package szoeke.bence.kafkaprocessor.utility;
+package szoeke.bence.kafkaprocessor.serde.jsonnode;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.Deserializer;
-import szoeke.bence.kafkaprocessor.entity.BasicBlockAggregate;
 
 import java.io.IOException;
 
 import static java.util.Objects.isNull;
 import static szoeke.bence.kafkaprocessor.KafkaProcessorApplication.OBJECT_MAPPER;
 
-public class BasicBlockAggregateDeserializer implements Deserializer<BasicBlockAggregate> {
+public class JsonNodeDeserializer implements Deserializer<JsonNode> {
 
     @Override
-    public BasicBlockAggregate deserialize(String str, byte[] data) {
+    public JsonNode deserialize(String str, byte[] data) {
         try {
-            return hasNoData(data) ? null : OBJECT_MAPPER.readValue(data, BasicBlockAggregate.class);
+            return hasNoData(data) ? null : OBJECT_MAPPER.readTree(data);
         } catch (IOException e) {
             throw new SerializationException(e);
         }
     }
 
     @Override
-    public BasicBlockAggregate deserialize(String topic, Headers headers, byte[] data) {
+    public JsonNode deserialize(String topic, Headers headers, byte[] data) {
         return deserialize(null, data);
     }
 

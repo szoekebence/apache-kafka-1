@@ -8,19 +8,19 @@ import org.junit.Test;
 import szoeke.bence.kafkaprocessor.entity.BasicBlockAggregate;
 import szoeke.bence.kafkaprocessor.processor.mock.ConditionConfigFake;
 
-public class JsonNodeProcessorBasicBlockAggregationUnitTest {
+public class EventProcessorBasicBlockAggregationUnitTest {
 
     private static final String ERRORCODE_STARTS_WITH_4_JSON = "{\"eventRecordHeader\":{\"Result\":1,\"Cause\":{\"ErrorCode\":400}}}";
     private static final String ERRORCODE_STARTS_WITH_5_JSON = "{\"eventRecordHeader\":{\"Result\":1,\"Cause\":{\"ErrorCode\":500}}}";
     private static final String ERRORCODE_STARTS_WITH_6_JSON = "{\"eventRecordHeader\":{\"Result\":1,\"Cause\":{\"ErrorCode\":600}}}";
     private static final String SUCCESS_RESULT_JSON = "{\"eventRecordHeader\":{\"Result\":0}}";
-    private JsonNodeProcessor jsonNodeProcessor;
+    private EventProcessor jsonNodeProcessor;
     private ObjectMapper objectMapper;
 
     @Before
     public void setUp() {
         objectMapper = new ObjectMapper();
-        jsonNodeProcessor = new JsonNodeProcessor(new ConditionConfigFake());
+        jsonNodeProcessor = new EventProcessor(new ConditionConfigFake());
     }
 
     @Test

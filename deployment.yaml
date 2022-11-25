@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafkastreams-processor-svc
+  namespace: pelle
+  labels:
+    app: kafkastreams-processor
+spec:
+  ports:
+    - port: 12345
+      name: kafkastreams-processor
+  clusterIP: None
+  selector:
+    app: kafkastreams-processor
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafkastreams-processor
+  namespace: pelle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafkastreams-processor
+  serviceName: kafkastreams-processor-svc
+  template:
+    metadata:
+      labels:
+        app: kafkastreams-processor
+    spec:
+      #      nodeSelector:
+      #        kubernetes.io/hostname: kubernetes-worker-4
+      volumes:
+        - name: cluster-ca-cert
+          secret:
+            secretName: my-cluster-cluster-ca-cert
+      containers:
+        - name: kafkastreams-processor
+          image: szoekebence/kafka-processor:0.0.2
+          imagePullPolicy: Always
+          #        imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: cluster-ca-cert
+              mountPath: "/app/cluster-ca-cert"
+              readOnly: true
+          ports:
+            - containerPort: 12345
+          resources:
+            requests:
+              cpu: "15"
+              memory: "30Gi"
+            limits:
+              cpu: "15"
+              memory: "30Gi"
+          env:
+            - name: HEAPMIN
+              value: "1024m"
+            - name: HEAPMAX
+              value: "25600m"
+            - name: METRICS_RECORDING_LEVEL
+              value: "INFO"
+            - name: OPERATION_TYPE
+              value: "FILTER"
+            - name: OPERATION_CONDITION
+              value: ""
+            - name: BOOTSTRAP_SERVER
+              value: "my-cluster-kafka-bootstrap:9093"
+            - name: NUM_STREAM_THREADS
+              value: "3"
+            - name: COMMIT_INTERVAL_MS
+              value: "1000"
+            - name: TLS_ENABLE
+              value: "true"

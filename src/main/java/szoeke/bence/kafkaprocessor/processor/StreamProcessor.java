@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
 import szoeke.bence.kafkaprocessor.entity.AverageBlockAggregate;
@@ -83,7 +82,7 @@ public class StreamProcessor {
     private void defineAnonymizationOperations() {
         builder
                 .stream(INPUT_TOPIC, Consumed.with(stringSerde, jsonNodeSerde))
-                .map((key, value) -> new KeyValue<>(key, eventProcessor.anonymization(value)))
+                .mapValues(eventProcessor::anonymization)
                 .to(OUTPUT_TOPIC, Produced.with(stringSerde, stringSerde));
     }
 

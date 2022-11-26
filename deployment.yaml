@@ -63,7 +63,7 @@ spec:
             - name: OPERATION_TYPE
               value: "FILTER"
             - name: OPERATION_CONDITION
-              value: ""
+              value: "/eventRecordHeader/KeyIds/ServedUser in [000000000000, 111111111111]"
             - name: BOOTSTRAP_SERVER
               value: "my-cluster-kafka-bootstrap:9093"
             - name: NUM_STREAM_THREADS
